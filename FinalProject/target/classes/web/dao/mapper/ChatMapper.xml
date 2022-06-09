@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="web.dao.face.ChatDao">
+	
+	<insert id="setChatRoom" parameterType="web.dto.ChatDto">
+		insert into chatroom (room_id, room_name)
+		values (#{roomId},#{roomName})
+	</insert>
+	
+	<insert id="saveMsg" parameterType="web.dto.ChatDto">
+		insert into chatlog (chat_no, room_id, is_start, is_end , user_id, chat_log)
+		values (chat_no_seq.nextval, #{roomId}, #{isStart},#{isEnd}, #{userID}, #{chatLog})
+	</insert>
+	
+	<select id="getMsg" parameterType="web.dto.ChatDto">
+		select * from chatlog
+		where user_id = #{userid}
+	</select>
+	
+	<select id="getChatRooms" resultType="web.dto.ChatRoomDto">
+		select room_id, room_name from chatRoom
+	</select>
+	
+	<select id="getRoomToGo" resultType="web.dto.ChatRoomDto">
+		select * from chatRoom
+		where room_id = #{roomId}
+		
+	</select>
+	
+	<delete id="deleteRoom" parameterType="web.dto.ChatRoomDto">
+		delete from chatRoom 
+		where room_id = #{roomId}
+	</delete>
+	
+	<select id="getChatLog" parameterType="String" resultType="web.dto.ChatDto">
+	select * from chatlog
+		where chat_date >=
+		   ( select chat_date from (
+		    (select rownum, E.* from
+		        (select chat_date, user_id, chat_log 
+		        from chatlog
+		        where user_id = #{userID} and room_id = #{roomId}
+		            and is_start = 1
+		        order by chat_date desc) E
+		    where rownum = 1))) 
+		and 
+		    chat_date <![CDATA[<=]]>
+		    ( select chat_date from (
+		    (select rownum, E.* from
+		        (select chat_date, user_id, chat_log 
+		        from chatlog
+		        where user_id = #{userID}  and room_id = #{roomId}
+		            and is_end = 1
+		        order by chat_date desc) E  
+		    where rownum = 1)))
+		order by chat_date
+	</select>
+
+
+	<select id="get11chatList" resultType="web.dto.ChatDto" parameterType="web.dto.ChatDto"> 
+		select user_id, chat_date from 
+		(select user_id, is_start, chat_date, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY chat_date desc) as A
+		from chatlog
+		)
+		where A = 1
+	</select>
+	
+	<select id="getPastChatLog" resultType="web.dto.ChatDto" parameterType="web.dto.ChatDto">
+	select * from chatlog
+		where chat_date >=
+		   ( select chat_date from (
+		    (select rownum, E.* from
+		        (select chat_date, user_id, chat_log 
+		        from chatlog
+		        where user_id = #{userID} and room_id = #{roomId}
+		            and is_start = 1
+		        order by chat_date desc) E
+		    where rownum = 1))) 
+		and 
+		    chat_date <![CDATA[<=]]>
+		    ( select chat_date from (
+		    (select rownum, E.* from
+		        (select chat_date, user_id, chat_log 
+		        from chatlog
+		        where user_id =#{userID}  and room_id = #{roomId}
+		            and is_end = 1
+		        order by chat_date desc) E  
+		    where rownum = 1)))
+		order by chat_date
+	</select>
+
+</mapper>

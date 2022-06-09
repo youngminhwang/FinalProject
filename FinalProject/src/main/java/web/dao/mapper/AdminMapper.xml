@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="web.dao.face.AdminDao">
+	
+	<!-- 카테고리 -->
+	<select id="category" resultType="web.dto.Category">
+	SELECT 
+		level, cateName, cateCode, cateCodeRef 
+	FROM goods_category
+    	START WITH cateCodeRef IS NULL CONNECT BY PRIOR cateCode = cateCodeRef
+	</select>
+	
+	<!-- 상품 등록 -->
+	<insert id="register" parameterType="web.dto.Goods">
+ 		INSERT INTO tbl_goods (gdsNum, gdsName, cateCode, gdsPrice, gdsStock, gdsDes, ImgOriginName, ImgStoredName, ImgOriginName2, ImgStoredName2)
+     	VALUES (tbl_goods_seq.nextval, #{gdsName}, #{cateCode}, #{gdsPrice}, #{gdsStock}, #{gdsDes}, #{ImgOriginName}, #{ImgStoredName}, #{ImgOriginName2}, #{ImgStoredName2})
+	</insert>
+	
+	    <!-- 상품 목록 --> 
+    <select id="goodsList" resultType="web.dto.GoodsView" parameterType="web.util.Paging">
+         SELECT * FROM (
+        SELECT rownum rnum, B.* FROM (
+                 SELECT
+                      gdsNum, gdsName, g.cateCode, c.cateCodeRef, c.cateName, gdsPrice, gdsStock, gdsDes, gdsDate, ImgOriginName, ImgStoredName
+                FROM tbl_goods g, goods_category c
+                WHERE g.cateCode = c.cateCode
+                <if test="search!=null and !search.equals('')">
+                        AND ${searchOpt} LIKE '%' || #{search} || '%' 
+                </if>
+                ORDER BY gdsNum DESC
+            ) B
+        ) BOARD
+        WHERE rnum BETWEEN #{startNo } AND #{endNo }
+        
+    </select>
+    
+        
+    <!-- 상품 게시판의 상품수 -->
+    <select id="selectProductCntAll" resultType="int" parameterType="web.util.Paging">    
+        SELECT
+                count(*)
+        FROM tbl_goods g, goods_category c
+        WHERE g.cateCode = c.cateCode
+        <if test="search!=null and !search.equals('')">
+                AND ${searchOpt} LIKE '%' || #{search} || '%' 
+        </if>
+        ORDER BY gdsNum DESC
+ 
+    </select>
+	
+	
+	<!-- 상품 조회 + 카테고리 조인-->
+	<select id="goodsView" resultType="web.dto.GoodsView">
+ 		SELECT
+     		g.gdsNum, g.gdsName, g.cateCode, c.cateCodeRef, c.cateName, gdsPrice, gdsStock, gdsDes, gdsDate,ImgOriginName, ImgStoredName, ImgOriginName2, ImgStoredName2
+        FROM tbl_goods g, goods_category c                        
+        WHERE g.cateCode = c.cateCode  
+        AND g.gdsNum = #{gdsNum}
+	</select>
+	
+	<!-- 상품 수정 -->
+	<update id="goodsUpdate" parameterType="web.dto.GoodsView">
+ 		UPDATE tbl_goods
+     	SET
+         gdsName = #{gdsName},
+         cateCode = #{cateCode},
+         gdsPrice = #{gdsPrice},
+         gdsStock = #{gdsStock},
+         gdsDes = #{gdsDes},
+         ImgOriginName = #{ImgOriginName},
+         ImgStoredName = #{ImgStoredName},
+         ImgOriginName2 = #{ImgOriginName2},
+         ImgStoredName2 = #{ImgStoredName2}
+     	WHERE gdsNum = ${gdsNum}
+	</update>
+	
+	<!-- 상품 삭제 -->
+	<delete id="goodsDelete" parameterType="web.dto.Goods">
+ 		DELETE
+     		tbl_goods
+ 		WHERE gdsNum = #{gdsNum}
+	</delete>
+	
+	<!-- 주문 목록 -->
+	<select id="orderList" resultType="web.dto.OrderList">
+ 		SELECT
+     		o.orderId, o.member_no, o.orderRec, o.addr1, o.addr2, o.addr3, o.phone, o.amount, o.orderDate, o.imp_uid, o.merchant_uid, o.paid_amount, o.apply_num, o.delivery,
+     		d.orderDetailsNum, d.gdsNum, d.cartStock,
+     		g.gdsName, g.ImgOriginName, g.ImgStoredName, g.gdsPrice
+ 		FROM tbl_order o
+ 			INNER JOIN tbl_order_details d
+             		ON o.orderId = d.orderId
+            INNER JOIN tbl_goods g
+            		ON d.gdsNum = g.gdsNum
+     	ORDER BY o.orderDate DESC
+	</select>
+	
+	<!-- 특정 주문 목록 -->
+	<select id="orderView" resultType="web.dto.OrderList">
+ 		SELECT
+     		o.orderId, o.member_no, o.orderRec, o.addr1, o.addr2, o.addr3, o.phone, o.amount, o.orderDate, o.imp_uid, o.merchant_uid, o.paid_amount, o.apply_num, o.delivery,
+     		d.orderDetailsNum, d.gdsNum, d.cartStock,
+     		g.gdsName, g.ImgOriginName, g.ImgStoredName, g.gdsPrice
+ 		FROM tbl_order o
+         		INNER JOIN tbl_order_details d
+             		ON o.orderId = d.orderId
+         		INNER JOIN tbl_goods g
+            		ON d.gdsNum = g.gdsNum
+         	WHERE o.orderId = #{orderId}
+	</select>
+	
+	<!-- 배송 상태 -->
+	<update id="delivery">
+	 	UPDATE tbl_order
+	     	SET delivery = #{delivery}
+		WHERE orderId = #{orderId}
+	</update>
+	
+	<!-- 상품 수량 조절 -->
+	<update id="changeStock">
+	 	UPDATE tbl_goods
+	     	SET gdsStock = gdsStock - #{gdsStock}
+	 	WHERE gdsNum = #{gdsNum}
+	</update>
+	
+	<!-- 관리자 아이디 조회 -->
+	<select id="selectCntByadmin" parameterType="web.dto.Admin" resultType="int">
+		SELECT count(*) FROM admin
+		WHERE admin_id=#{adminId}
+		AND admin_pw=#{adminPw}
+	</select>
+	
+	<!-- 멤버게시판 조회 -->
+	<select id="selectMemberList" parameterType="web.util.Paging" resultType="web.dto.Member">
+		SELECT * FROM (
+			SELECT rownum rnum, B.* FROM (
+				SELECT
+					member_no, id, nick
+				FROM member
+				WHERE 1=1
+				<if test="search!=null and !search.equals('')">
+					<if test="searchOpt.equals('memberNo')">
+						AND member_no = #{search}
+					</if>
+					<if test="!searchOpt.equals('memberNo')">
+						AND ${searchOpt} LIKE '%' || #{search} || '%' 
+					</if>
+				</if>
+				ORDER BY member_no DESC
+			) B
+		) BOARD
+		WHERE rnum BETWEEN #{startNo } AND #{endNo }
+	</select>
+	
+	<!-- 멤버 게시판의 멤버수 -->
+	<select id="selectCntAll" resultType="int">
+		SELECT count(*) FROM member
+		WHERE 1=1
+		<if test="search!=null and !search.equals('')">
+			<if test="searchOpt.equals('memberNo')">
+				AND member_no = #{search} 
+			</if>
+			<if test="!searchOpt.equals('memberNo')">
+				AND ${searchOpt} LIKE '%' || #{search} || '%' 
+			</if>
+		</if>
+	</select>
+	
+	<!-- 멤버 상세정보 -->
+	<select id="selectBymemeberNo" parameterType="web.dto.Member" resultType="web.dto.Member">
+		SELECT member_no, id, name, nick, email, phone, addr1, addr2, addr3, mdate
+		FROM member
+		WHERE member_no=${memberNo}
+	</select>
+	
+	<!-- 멤버 수정 -->
+	<update id="updateBymember" parameterType="web.dto.Member" >
+		UPDATE member 
+		<trim prefix="SET" prefixOverrides=",">
+		
+		<if test="id!=null and !id.equals('')">
+			, id=#{id}
+		</if> 
+		<if test="name!=null and !name.equals('')">
+			, name=#{name}
+		</if> 
+		<if test="nick!=null and !nick.equals('')">
+			, nick=#{nick}
+		</if> 
+		<if test="email!=null and !email.equals('')">
+			, email=#{email}
+		</if> 
+		<if test="phone!=null and !phone.equals('')">
+			, phone=#{phone}
+		</if> 
+		<if test="addr1!=null and !addr1.equals('')">
+			, addr1=#{addr1}
+		</if> 
+		<if test="addr2!=null and !addr2.equals('')">
+			, addr2=#{addr2}
+		</if> 
+		<if test="addr3!=null and !addr3.equals('')">
+			, addr3=#{addr3}
+		</if>
+		
+	 	</trim> 
+	 	
+		WHERE member_no = #{memberNo}
+	</update>
+	
+	<!-- 멤버 삭제 -->
+	<delete id="deleteBymember" parameterType="web.dto.Member">
+		DELETE member 
+		WHERE member_no=#{memberNo}
+	</delete>
+	
+	<!-- 게시판 게시글 조회 -->
+	<select id="selectBoardList" parameterType="hashmap" resultType="web.dto.Board">
+		SELECT * FROM (
+			SELECT rownum rnum, B.* FROM (
+				SELECT
+					boardNo, btitle, id, hit
+				FROM board
+				WHERE 1=1	
+					<if test="board.cateno!=0">		
+						 AND cateno=${board.cateno}
+					 </if>
+					 
+					 <if test="paging.search!=null and !paging.search.equals('')">
+						AND ${paging.searchOpt} LIKE '%' || #{paging.search} || '%' 
+					</if>
+					
+				ORDER BY boardno DESC
+			) B
+		) BOARD
+		WHERE rnum BETWEEN #{paging.startNo } AND #{paging.endNo }
+	</select>
+	
+	<!-- 게시글 수 조회 -->
+	<select id="selectCntBoardAll"  parameterType="hashmap" resultType="int">
+		SELECT count(*) FROM board
+		WHERE 1=1
+		<if test="board.cateno!=0">	
+			AND cateno=${board.cateno}
+		</if>
+					 
+		<if test="paramData.search!=null and !paramData.search.equals('')">
+			AND ${paramData.searchOpt} LIKE '%' || #{paramData.search} || '%' 
+		</if>
+	</select>
+
+	<!-- 게시글 상세조회 -->
+	<select id="selectBoardNo" parameterType="web.dto.Board" resultType="web.dto.Board">
+		SELECT boardNo, btitle, bcontent, id, nick, hit, bdate, cateno
+		FROM board
+		WHERE boardno = #{boardno}
+	</select>
+	
+	<select id="selectBoardFileCntByBoardNo" parameterType="web.dto.Board" resultType="int">
+		SELECT count(*)
+		FROM boardfile
+		WHERE boardno = #{boardno}
+	</select>
+	
+	<!-- 게시글 파일 갯수 -->
+	<select id="selectBoardFileByBoardNo" parameterType="web.dto.Board" resultType="web.dto.BoardFile">
+		SELECT fileno, boardno, origin_name, stored_name
+		FROM boardfile
+		WHERE boardno = #{boardno}
+	</select>
+	
+	<!-- 댓글 갯수 -->
+	<select id="selectReplyCntByBoardNo" parameterType="web.dto.Board" resultType="int">
+		SELECT count(*)
+		FROM replytb
+		WHERE boardno =#{boardno}
+	</select>
+	
+	<!-- boardno에 해당하는 댓글 -->
+	<select id="selectRelyByBoardNo" parameterType="hashmap" resultType="web.dto.Reply">
+		SELECT * FROM (
+			SELECT rownum rnum, B.* FROM (
+				SELECT replyno, boardno, id, content, bdate
+				FROM replytb
+				WHERE boardno = #{board.boardno}
+				ORDER BY bdate DESC
+			) B
+		) BOARD
+		WHERE rnum BETWEEN #{paging.startNo } AND #{paging.endNo }
+	</select>
+	
+	<!-- 리뷰번호에 해당하는 리뷰 삭제 -->
+	<delete id="deleteByReviewNo" parameterType="int">
+		DELETE FROM replytb
+		WHERE replyno=#{parseInt}
+	</delete>
+	
+	<!-- boardno에 해당하는 게시글 삭제 -->
+	<delete id="deleteBoardByBoardNo" parameterType="web.dto.Board">
+		DELETE FROM board
+		WHERE boardno=#{boardno}
+	</delete>
+	
+	<!-- boardno에 해당하는 댓글 삭제 -->
+	<delete id="deleteReviewByBoardNo" parameterType="web.dto.Board">
+		DELETE FROM replytb
+		WHERE boardno=#{boardno}
+	</delete>
+	
+	<!-- boardno에 해당하는 파일 삭제 -->
+	<delete id="deleteFileByBoardNo" parameterType="web.dto.Board">
+		DELETE FROM boardfile
+		WHERE boardno=#{boardno}
+	</delete>
+	
+	<!-- 식물 추천 정보 등록 -->
+	<insert id="dailyPlantInsert" parameterType="web.dto.DailyPlant">
+ 		INSERT INTO dailyplant
+     	VALUES (dailyplant_seq.nextval, #{name}, #{water}, #{sun}, #{humidity}, #{ImgOriginName}, #{ImgStoredName})
+	</insert>
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="web.dao.face.ReserveDao">
+	
+	<select id="getGardenNameList" resultType="String">
+	SELECT garden_name FROM garden
+	</select>
+	
+	<select id="getGardenPrice" parameterType="String" resultType="web.dto.GardenPriceDto" >
+	select * from gardenPrice 
+	where garden_name = #{garden}
+	</select>
+	
+	<insert id="saveResInfo" parameterType="web.dto.ReserveInfo">
+	
+	insert into gardenReserve(reserve_no, garden_no, GARDEN_NAME, member_No, VISIT_DATE, visit_time, ADULT_MEM, CHILD_MEM, DISAB_MEM, TOTAL_PRICE)
+	values (res_sequence.nextval, #{gardenNo}, #{gardenName}, #{memberNo}, to_date(#{visitDate},'yyyy-mm-dd'), #{visitTime}, #{adultMem}, #{childMem}, #{disabMem}, #{totalPrice})
+	
+	</insert>
+  
+  
+  	<select id="getReserveNo" parameterType="int" resultType="int">
+  	 select reserve_no from
+  	(select reserve_no from gardenReserve 
+    where member_No =  #{memberNo}
+    order by reserve_no desc)
+    where rownum = 1
+  	</select>
+  	
+  	<select id="getResInfo" parameterType="int" resultType="web.dto.ReserveInfo">
+  	select * from gardenReserve
+  	where reserve_no = #{resNo}
+  	
+  	</select>
+  	
+    	
+	<insert id="saveQrName" parameterType="HashMap">
+	update gardenReserve set qr_code = #{qrImgName}
+	where reserve_no = #{resNo}
+	</insert>  
+	
+	<update id="updateResInfo" parameterType="web.dto.ReserveInfo">
+	update gardenReserve set 
+		GARDEN_NO = #{gardenNo},
+		GARDEN_NAME = #{gardenName},
+		VISIT_DATE = #{visitDate},
+		VISIT_TIME = #{visitTime},
+		ADULT_MEM = #{adultMem},
+		CHILD_MEM = #{childMem},
+		DISAB_MEM = #{disabMem},
+		TOTAL_PRICE = #{totalPrice}
+	where reserve_no = #{reserveNo}
+		
+	</update>
+	
+	<update id="updateQrCode" parameterType="HashMap">
+	update gardenReserve set QR_CODE = #{qrNo}
+	where  reserve_no = #{resNo}
+	
+	</update>
+  	
+  
+  </mapper>

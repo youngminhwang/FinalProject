@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <mapper namespace="web.dao.face.MyPlantDao">
+ 
+ 	<resultMap type="web.dto.MyPlant" id="myPlant">
+ 		<id column="myplant_no" property="myPlantNo"/>
+ 		<result column="member_no" property="memberNo"/>
+ 		<result column="cnum" property="cnum"/>
+ 		<result column="bname" property="bname"/>
+ 		<result column="nick" property="nick"/>
+ 		<result column="birth" property="birth"/>
+ 		<result column="water" property="water"/>
+ 		<result column="origin" property="origin"/>
+ 		<result column="stored" property="stored"/>
+ 	</resultMap>
+ 
+ 	<select id="selectList" resultMap="myPlant" parameterType="int">
+ 		SELECT myplant_no, bname, nick, birth, water, origin, stored FROM myplant 
+ 		WHERE member_no = #{memberNo}
+ 		ORDER BY myplant_no
+ 	</select>
+ 	
+ 	<select id="selectNick" resultType="String" parameterType="int">
+ 		SELECT nick FROM myplant WHERE myplant_no = #{myPlantNo}
+ 	</select>
+ 	
+ 	<select id="select" resultMap="myPlant" parameterType="int">
+ 		SELECT myplant_no, bname, cnum, nick, birth, water, origin, stored FROM myplant
+ 		WHERE myplant_no = #{myPlantNo}
+ 	</select>
+ 	
+ 	<insert id="insert" parameterType="web.dto.MyPlant">
+ 		INSERT INTO myplant
+ 		VALUES (myplant_seq.NEXTVAL, #{memberNo}, #{cnum}, #{bname}, #{nick}, #{birth}, #{water}, #{origin}, #{stored})
+ 	</insert>
+ 	
+ 	<update id="update" parameterType="web.dto.MyPlant">
+ 		UPDATE myplant SET
+ 			cnum =  #{cnum}, 
+ 			bname = #{bname}, 
+ 			nick = #{nick}, 
+ 			birth = #{birth}, 
+ 			water = #{water}, 
+ 			origin = #{origin}, 
+ 			stored = #{stored}
+ 		WHERE myplant_no = #{myPlantNo}
+ 	</update>
+ 	
+ 	<delete id="delete" parameterType="int">
+ 		DELETE myplant
+ 		WHERE myplant_no = #{myPlantNo}
+ 	</delete>
+ 	
+</mapper>

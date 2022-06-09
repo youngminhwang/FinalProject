@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <mapper namespace="web.dao.face.DiaryDao">
+ 
+ 	<resultMap type="web.dto.Diary" id="Diary">
+ 		<id column="diary_no" property="diaryNo"/>
+ 		<result column="myplant_no" property="myPlantNo"/>
+ 		<result column="temp" property="temp"/>
+ 		<result column="humid" property="humid"/>
+ 		<result column="dirt" property="dirt"/>
+ 		<result column="water" property="water"/>
+ 		<result column="repot" property="repot"/>
+ 		<result column="cmt" property="cmt"/>
+ 		<result column="ddate" property="ddate"/>
+ 		<result column="origin" property="origin"/>
+ 		<result column="stored" property="stored"/>
+ 	</resultMap>
+ 	
+ 	<select id="selectSum" resultMap="Diary" parameterType="Map">
+ 		SELECT temp, humid, dirt, water, repot FROM diary
+ 		WHERE myplant_no = #{myPlantNo} and ddate = #{date}
+ 	</select>
+ 	
+ 	<select id="select" resultMap="Diary" parameterType="Map">
+ 		SELECT * FROM diary
+ 		WHERE myplant_no = #{myPlantNo} and ddate = #{ddate}
+ 	</select>
+ 	
+ 	<insert id="insert" parameterType="web.dto.Diary">
+		INSERT INTO diary ( diary_no ,myplant_no, temp, humid, dirt, water, repot, cmt, ddate, origin, stored )
+		VALUES ( diary_seq.NEXTVAL, #{myPlantNo}, #{temp}, #{humid}, #{dirt}, #{water}, #{repot}, #{cmt}, #{ddate}, #{origin}, #{stored} )
+	</insert>
+	
+	<update id="update" parameterType="web.dto.Diary">
+		UPDATE diary SET 
+			temp = #{temp},
+			humid = #{humid},
+			dirt = #{dirt},
+			water = #{water},
+			repot = #{repot},
+			cmt = #{cmt},
+			origin = #{origin},
+			stored = #{stored}
+		WHERE myplant_no = #{myPlantNo} and ddate = #{ddate}
+	</update>
+	
+	<delete id="delete" parameterType="Map">
+ 		DELETE diary
+ 		WHERE myplant_no = #{myPlantNo} and ddate = #{ddate}
+ 	</delete>
+ 
+ </mapper>

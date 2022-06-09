@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="web.dao.face.GardenDao">
+	
+	<select id="selectByGardenName" parameterType="web.dto.Garden" resultType="int">
+		SELECT garden_no FROM garden
+		WHERE garden_name=#{gardenName}
+	</select>
+	
+	<select id="selectCntByGardenNo" parameterType="int" resultType="int">
+		SELECT count(*)
+		FROM garden_review
+		WHERE garden_no = #{gardenNo}
+	</select>
+	
+	<select id="selectListAll" parameterType="hashmap"  resultType="hashmap">
+		SELECT * FROM (
+			SELECT rownum rnum, B.* FROM (
+				SELECT gr_no grNo, gr_content grContent, garden_name gardenName, nick, id, gr_date grDate
+				FROM garden_review, garden, member
+				WHERE garden_review.garden_no=garden.garden_no
+				AND garden_review.member_no=member.member_no
+				AND garden.garden_no = #{gardenNo}
+				ORDER BY gr_date desc
+			) B
+		) BOARD
+		WHERE rnum BETWEEN #{paging.startNo } AND #{paging.endNo }
+	</select>	
+	
+	<select id="selectNumByMemberId" parameterType="web.dto.Garden" resultType="int">
+		SELECT member_no FROM member
+		WHERE id = #{id}
+	</select>
+	
+	<insert id="insertReview" parameterType="web.dto.Garden">
+		INSERT INTO garden_review(gr_no, gr_content, garden_no, member_no)
+		VALUES(garden_review_seq.nextval, #{grContent}, #{gardenNo}, #{memberNo})
+	</insert>
+	
+	<delete id="deleteReview" parameterType="web.dto.Garden">
+		DELETE FROM garden_review
+		WHERE gr_no = #{grNo}
+	</delete>
+	
+	<update id="updateReview" parameterType="web.dto.Garden">
+		UPDATE garden_review SET gr_content = #{grContent}
+		WHERE gr_no = #{grNo}
+	</update>
+	
+	
+</mapper>

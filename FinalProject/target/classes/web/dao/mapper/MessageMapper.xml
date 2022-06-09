@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+    
+<mapper namespace="web.dao.face.MessageDao">
+
+ 	<resultMap type="web.dto.Message" id="Message">
+ 		<id column="message_no" property="messageNo"/>
+ 		<result column="ms_title" property="msTitle"/>
+ 		<result column="receiver_name" property="receiverName"/>
+ 		<result column="division" property="division"/>
+ 		<result column="ms_content" property="msContent"/>
+ 		<result column="ms_date" property="msDate"/>
+ 		<result column="sender_name" property="senderName"/>
+ 		<result column="member_no" property="memberNo"/>
+ 		<result column="read_yn" property="readYn"/>
+ 	</resultMap> 
+
+	<!-- 읽지 않은 메세지 카운트 -->
+	<select id="countMessageView" resultType="String">
+        SELECT count(*) FROM tbl_message 
+        WHERE receiver_name= #{receiverName}
+        	AND division = 0
+    </select> 
+    
+    <!-- 수신한 메세지 전체 List -->
+	<select id="findList" resultMap="Message">
+        SELECT * FROM tbl_message 
+        WHERE receiver_name= #{receiverName}
+        ORDER BY ms_date DESC
+    </select>
+    
+    <!-- 메세지 보내기 -->
+    <insert id="insertMessage" parameterType="web.dto.Message">
+    	INSERT INTO tbl_message(message_no, ms_title, receiver_name, division, ms_content, sender_name, member_no, read_yn)
+    	VALUES(tbl_message_seq.nextval, #{msTitle}, #{receiverName}, #{division}, #{msContent}, #{senderName}, #{memberNo}, #{readYn})
+    </insert>
+	
+	<!-- 유저 List -->
+	<select id="searchMember" resultType="web.dto.Member">
+		SELECT id FROM member
+		ORDER BY id desc
+	</select>
+	
+	<!-- 메세지 확인 시 읽음 처리 -->
+	<update id="updateRead">
+		UPDATE tbl_message
+		SET division = #{division}
+		WHERE receiver_name= #{receiverName}
+	</update>
+	
+	<!-- 메세지 삭제 -->
+	<delete id="deleteMessage">
+	 	DELETE tbl_message
+	     	WHERE message_no = #{messageNo}
+	</delete>
+	
+</mapper>

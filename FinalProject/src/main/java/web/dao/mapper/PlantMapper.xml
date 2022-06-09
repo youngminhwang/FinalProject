@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <mapper namespace="web.dao.face.PlantDao">
+ 
+ 	<select id="select" resultType="String" parameterType="web.dto.PlantCode">
+ 		SELECT text FROM plant
+ 		WHERE ( type = 'temp' and code = #{temp} ) 
+ 		or ( type = 'tempw' and code = #{tempW} ) 
+ 		or ( type = 'humid' and code = #{humid} ) 
+ 		or ( type = 'dirt' and code = #{dirt} ) 
+ 		or ( type = 'dirtw' and code = #{dirtW} )
+ 		ORDER BY pnum
+ 	</select>
+ 
+ </mapper>

@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="web.dao.face.BoardDao">
+	
+	<select id="selectFreeList" parameterType="web.util.Paging_board" resultType="web.dto.Board">
+		 
+		select * from (
+			select rownum rnum, B.* FROM (
+				select
+					boardno , btitle , bcontent , id , nick , hit , bdate , cateno 
+				from board
+				where btitle like '%' || #{search} || '%'
+				and cateno = 1
+				order by boardno DESC
+			) B
+		) BOARD
+		
+		where rnum between #{startNo } and #{endNo }
+		
+		
+	</select>
+
+
+	<select id = "selectCntAll" resultType="int">
+		select count(*) from board	
+		where btitle like '%' || #{search} || '%'
+		and cateno = 1
+	</select>
+	
+	
+	<update id="hit" parameterType="web.dto.Board">
+	
+		update board
+		set hit = hit + 1
+		where boardno = #{boardno}
+		
+	</update>
+	
+	<select id="select" resultType="web.dto.Board" parameterType="web.dto.Board">
+			
+		select 
+			boardno , btitle , bcontent , id , nick , hit , bdate
+		from board
+		where boardno = #{boardno}
+		
+	</select>
+	
+	<insert id="insertBoard" parameterType="web.dto.Board">
+		
+		<selectKey order="BEFORE" resultType="int" keyProperty="boardno">
+			select board_seq.nextval from dual
+		
+		</selectKey>	
+		 
+		insert into board ( boardno , btitle , bcontent , id , nick , cateno)
+		values ( #{boardno} , #{btitle} , #{bcontent} , #{id} , #{nick} , #{cateno})
+	</insert>
+	
+	<insert id="insertFile" parameterType="web.dto.BoardFile">
+
+		insert into boardFile( fileno , boardno , origin_name , stored_name )
+		values ( boardfile_seq.nextval , #{boardNo} , #{originName} , #{storedName} )
+
+	</insert>
+	
+	<!-- 게시글번호로 첨부파일조회 -->
+	<select id="selectBoardFileByBoardno" parameterType="web.dto.Board" resultType="web.dto.BoardFile">
+		select 
+				fileno fileNo
+				, boardno boardNo
+				, origin_name originName
+				, stored_name storedName
+			
+		from boardFile
+		where boardno = #{boardno}
+	
+	</select>
+	
+	<!-- 파일번호로 첨부파일 조회(다운로드) -->
+	<select id="selectBoardFileByFileNo" parameterType="web.dto.BoardFile" resultType="web.dto.BoardFile">
+	
+		select 
+				fileno fileNo
+				, boardno boardNo
+				, origin_name originName
+				, stored_name storedName
+			
+		from boardFile
+		where fileno = #{fileNo}
+	
+	</select>
+	
+
+	<update id="freeUpdate" parameterType="web.dto.Board">
+		
+		update board
+		set btitle =#{btitle}
+			, bcontent = #{bcontent}
+		
+		where boardno = #{boardno}
+		
+	</update>
+	
+	<delete id="deleteFile" parameterType="web.dto.Board">
+		delete boardfile
+		where boardno = #{boardno}
+		
+	</delete>
+	
+	
+	<delete id="freeDelete" parameterType="web.dto.Board">
+		delete board
+		where boardno = #{boardno}
+	</delete>
+	
+	
+	
+<!-- **사진게시판** -->
+	
+	<!-- 사진게시판 리스트 -->
+	<select id="selectPhotoList" parameterType="web.util.Paging_board" resultType="web.dto.Board">
+	 
+	select * from (
+		select rownum rnum, B.* FROM (
+			select
+				boardno , btitle , bcontent , id , nick , hit , bdate , cateno 
+			from board
+			where cateno = 2
+			order by boardno DESC
+		) B
+	) BOARD
+	
+	where rnum between #{startNo } and #{endNo }
+	
+		
+	</select>
+
+
+
+	<select id = "photoSelectCntAll" resultType="int">
+	
+		select count(*) from board	
+		where cateno = 2
+	</select>
+	
+	<update id="photoHit" parameterType="web.dto.Board">
+
+	update board
+	set hit = hit + 1
+	where boardno = #{boardno}
+		
+	</update>
+	
+	
+	<select id="photoSelect" resultType="web.dto.Board" parameterType="web.dto.Board">
+		
+		select 
+			boardno , btitle , bcontent , id , nick , hit , bdate
+		from board
+		where boardno = #{boardno}
+			
+			
+	</select>
+	
+	
+	<insert id="photoinsertBoard" parameterType="web.dto.Board">
+		
+		<selectKey order="BEFORE" resultType="int" keyProperty="boardno">
+			select board_seq.nextval from dual
+		
+		</selectKey>	
+		 
+		insert into board ( boardno , btitle , bcontent , id , nick , cateno)
+		values ( #{boardno} , #{btitle} , #{bcontent} , #{id} , #{nick} , #{cateno})
+	
+	</insert>
+	
+	<insert id="photoinsertFile" parameterType="web.dto.BoardFile">
+
+		insert into boardFile( fileno , boardno , origin_name , stored_name )
+		values ( boardfile_seq.nextval , #{boardNo} , #{originName} , #{storedName} )
+
+	</insert>
+	
+	
+	
+ 	<!-- 사진 게시글번호로 첨부파일조회 -->
+	<select id="selectPhotoBoardFileByBoardno" parameterType="web.dto.Board" resultType="web.dto.BoardFile">
+		select 
+				fileno fileNo
+				, boardno boardNo
+				, origin_name originName
+				, stored_name storedName
+			
+		from boardFile
+		where boardno = #{boardno}
+	
+	</select>
+	
+	<!-- 파일번호로 첨부파일 조회(다운로드) -->
+	<select id="selectPhotoBoardFileByFileNo" parameterType="web.dto.BoardFile" resultType="web.dto.BoardFile">
+	
+		select 
+				fileno fileNo
+				, boardno boardNo
+				, origin_name originName
+				, stored_name storedName
+			
+		from boardFile
+		where fileno = #{fileNo}
+	
+	</select>
+	
+	<update id="photoUpdate" parameterType="web.dto.Board">
+		
+		update board
+		set btitle =#{btitle}
+			, bcontent = #{bcontent}
+		
+		where boardno = #{boardno}
+		
+	</update>
+	
+	<delete id="deletePhotoFile" parameterType="web.dto.Board">
+		delete boardfile
+		where boardno = #{boardno}
+		
+	</delete>
+	
+	
+	<delete id="photoDelete" parameterType="web.dto.Board">
+		delete board
+		where boardno = #{boardno}
+	</delete>
+	
+	<select id="fileSelectCntAll" resultType="int">
+	
+		select count(*) from boardfile
+        where rowid in(select max(rowid) from boardfile group by boardno)
+	
+	</select>
+	
+	<select id="getFilePhotoList" parameterType="web.util.Paging_board" resultType="web.dto.BoardFile">
+	 
+	select * from (
+      select rownum rnum, B.* FROM (
+            select
+            fileno fileNo
+            , b.boardno boardNo
+            , origin_name originName
+            , stored_name storedName
+            , b.btitle btitle
+         from (
+            select * from boardfile
+            where rowid in(select max(rowid) from boardfile group by boardno)
+            ) f 
+            inner join board b
+         on f.boardno = b.boardno
+            where b.cateno = 2
+         order by f.boardno DESC
+      ) B
+   ) BOARD
+   
+   where rnum between #{startNo } and #{endNo }
+		
+	</select>
+	
+	<!-- 게시글번호로 첨부파일조회 -->
+	<select id="selectPhotoBoardFile" parameterType="web.dto.Board" resultType="web.dto.BoardFile">
+		select 
+				fileno fileNo
+				, boardno boardNo
+				, origin_name originName
+				, stored_name storedName
+			
+		from boardFile
+		where boardno = #{boardno}
+	
+	</select>
+	
+
+	
+	
+</mapper>

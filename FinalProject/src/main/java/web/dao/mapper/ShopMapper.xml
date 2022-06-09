@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="web.dao.face.ShopDao">
+
+	<!-- <resultMap type="web.dto.OrderList" id="orderView">
+ 		<id column="cartNum" property="cartNum"/>
+ 		<result column="member_no" property="memberNo"/>
+ 		<result column="gdsNum" property="gdsNum"/>
+ 		<result column="cartStock" property="gdsStock"/>
+ 		<result column="addDate" property="cartStock"/>
+ 		<result column="gdsname" property="gdsname"/>
+ 		<result column="gdsPrice" property="gdsPrice"/>
+ 		<result column="gdsStock" property="gdsStock"/>
+ 		<result column="ImgOriginName" property="ImgOriginName"/>
+ 		<result column="ImgStoredName" property="ImgStoredName"/>
+ 	</resultMap> -->
+
+	<!-- 카테고리별 상품 리스트 : 1차 분류 -->
+	<select id="list_1" resultType="web.dto.GoodsView">
+		SELECT
+    		g.gdsNum, g.gdsName, g.cateCode, c.cateCodeRef, c.cateName, gdsPrice, gdsStock, gdsDes, gdsDate, ImgOriginName, ImgStoredName
+        FROM tbl_goods g
+            INNER JOIN goods_category c
+                ON g.cateCode = c.cateCode           
+            WHERE g.cateCode = #{cateCode}
+            	OR c.cateCodeRef = #{cateCodeRef}
+	</select>
+	
+	<!-- 카테고리별 상품 리스트 : 2차 분류 -->
+	<select id="list_2" resultType="web.dto.GoodsView">
+		SELECT
+    		g.gdsNum, g.gdsName, g.cateCode, c.cateCodeRef, c.cateName, gdsPrice, gdsStock, gdsDes, gdsDate, ImgOriginName, ImgStoredName
+        FROM tbl_goods g
+            INNER JOIN goods_category c
+                ON g.cateCode = c.cateCode           
+            WHERE g.cateCode = #{cateCode}
+	</select>
+	
+	<!-- 상품 조회 + 카테고리 조인-->
+	<select id="goodsView" resultType="web.dto.GoodsView">
+ 		SELECT
+     		g.gdsNum, g.gdsName, g.cateCode, c.cateCodeRef, c.cateName, gdsPrice, gdsStock, gdsDes, gdsDate,ImgOriginName, ImgStoredName, ImgOriginName2, ImgStoredName2
+        FROM tbl_goods g, goods_category c                        
+        WHERE g.cateCode = c.cateCode  
+        AND g.gdsNum = #{gdsNum}
+	</select>
+	
+	<!-- 카트 담기 -->
+	<insert id="addCart">
+ 		INSERT INTO tbl_cart (cartNum, member_no, gdsNum, cartStock)
+     	VALUES (tbl_cart_seq.nextval, #{memberNo}, #{gdsNum}, #{cartStock})
+	</insert>
+	
+	<!-- 카트 목록 -->
+	<select id="cartList" resultType="web.dto.CartList">
+		SELECT 
+			ROW_NUMBER() OVER(ORDER BY c.cartNum DESC) as num,
+			c.cartNum, c.member_no, g.gdsNum, c.cartStock, c.addDate,
+			g.gdsName, g.gdsPrice, g.ImgOriginName, g.ImgStoredName, g.gdsStock
+		FROM tbl_cart c
+			INNER JOIN tbl_goods g
+				ON c.gdsNum = g.gdsNum
+			WHERE c.member_no = #{memberNo}
+	</select>
+	
+	<!-- 카트 삭제 -->
+	<delete id="deleteCart">
+ 		DELETE tbl_cart
+     	WHERE cartNum = #{cartNum}
+         	AND member_no = #{memberNo}
+	</delete>
+	
+	<!-- 카트 수량 변경 -->
+	<update id="updateCart">
+		UPDATE tbl_cart
+		SET cartStock = #{cartStock}
+		WHERE cartNum = #{cartNum}
+	</update>
+	
+	<!-- 카트 담기 전 목록에 이미 담겨있는 지 체크 -->
+	<select id="selectCart" resultType="int" parameterType="web.dto.Cart">
+		SELECT count(*) FROM tbl_cart
+			WHERE gdsNum = #{gdsNum}
+			AND member_no = #{memberNo}
+	</select>
+	
+	<!-- 주문 정보 -->
+	<insert id="orderInfo">
+ 		INSERT INTO tbl_order(orderId, member_no, orderRec, addr1, addr2, addr3, phone, amount, imp_uid, merchant_uid, paid_amount, apply_num)
+     	VALUES(#{orderId}, #{memberNo}, #{orderRec}, #{addr1}, #{addr2}, #{addr3}, #{phone}, #{amount}, #{impUid}, #{merchantUid}, #{paidAmount}, #{applyNum})
+	</insert>
+   
+	<!-- 주문 상세 정보 --> 
+	<!-- INSERT SELECT문 -> SELECT에 있는 다수의 데이터 삽입 -->
+	<insert id="orderInfo_Details">
+ 		INSERT INTO tbl_order_details(orderDetailsNum, orderId, gdsNum, cartStock)
+     	SELECT tbl_order_details_seq.nextval, #{orderId}, gdsNum, cartStock
+         	FROM tbl_cart
+         	WHERE member_no = #{memberNo}
+	</insert> 
+	
+	<!-- 카트 비우기 -->
+	<delete id="cartAllDelete">
+	 	DELETE tbl_cart
+	     	WHERE member_no = #{memberNo}
+	</delete>
+	
+	<!-- 주문 목록 -->
+	<select id="orderList" resultType="web.dto.OrderList">
+ 		SELECT
+     		o.orderId, o.member_no, o.orderRec, o.addr1, o.addr2, o.addr3, o.phone, o.amount, o.orderDate, o.imp_uid, o.merchant_uid, o.paid_amount, o.apply_num, o.delivery,
+     		d.orderDetailsNum, d.gdsNum, d.cartStock,
+     		g.gdsName, g.ImgOriginName, g.ImgStoredName, g.gdsPrice
+ 		FROM tbl_order o
+ 			INNER JOIN tbl_order_details d
+             		ON o.orderId = d.orderId
+            INNER JOIN tbl_goods g
+            		ON d.gdsNum = g.gdsNum
+     	WHERE o.member_no = #{memberNo}
+     	ORDER BY o.orderDate DESC
+	</select>
+	
+	<!-- 특정 주문 목록 -->
+	<select id="orderView" resultType="web.dto.OrderList">
+ 		SELECT
+     		o.orderId, o.member_no, o.orderRec, o.addr1, o.addr2, o.addr3, o.phone, o.amount, o.orderDate, o.imp_uid, o.merchant_uid, o.paid_amount, o.apply_num, o.delivery,
+     		d.orderDetailsNum, d.gdsNum, d.cartStock,
+     		g.gdsName, g.ImgOriginName, g.ImgStoredName, g.gdsPrice
+ 		FROM tbl_order o
+         		INNER JOIN tbl_order_details d
+             		ON o.orderId = d.orderId
+         		INNER JOIN tbl_goods g
+            		ON d.gdsNum = g.gdsNum
+     	WHERE o.member_no = #{memberNo}
+         	AND o.orderId = #{orderId}
+	</select>
+	
+	<!-- 주문 취소 전, 주문 확인 -->
+	<select id="countOrder" resultType="int">
+		SELECT count(*) FROM tbl_order
+		WHERE member_no = #{memberNo}
+			AND orderId = #{orderId}
+	</select>
+	
+	<!-- 결제 정보 조회 -->
+	<select id="selectPayment" resultType="web.dto.OrderList">
+		SELECT imp_uid, merchant_uid, paid_amount, apply_num FROM tbl_order
+		WHERE member_no = #{memberNo}
+			AND orderId = #{orderId}
+	</select>
+	
+	
+
+</mapper>

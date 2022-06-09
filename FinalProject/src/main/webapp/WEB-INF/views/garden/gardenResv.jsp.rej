@@ -1,0 +1,111 @@
+diff a/Seeker/src/main/webapp/WEB-INF/views/garden/gardenResv.jsp b/Seeker/src/main/webapp/WEB-INF/views/garden/gardenResv.jsp	(rejected hunks)
+@@ -156,107 +156,107 @@
+ 		  if(type === 'plus') {
+ 		    number = parseInt(number) + 1;
+ 		  }else if(type === 'minus')  {
+ 		    number = parseInt(number) - 1;
+ 		  }
+ 		  if(number > 0){
+ 		  	$("#childTotal").text(number);
+ 			$("#child").attr('value',number)}
+ 		  else{
+ 			$("#childTotal").text(0);  
+ 			$("#child").attr('value','0')}
+ 		}
+ 	 
+   	function disabCount(type)  {
+   	  let number = $("#disabTotal").text();
+   	  if(type === 'plus') {
+   	    number = parseInt(number) + 1;
+   	  }else if(type === 'minus')  {
+   	    number = parseInt(number) - 1;
+   	  }
+   	  if(number > 0){
+   	  	$("#disabTotal").text(number);
+ 		$("#disability").attr('value',number)}
+   	  else{
+   		$("#disabTotal").text(0);  
+ 		$("#disability").attr('value','0')}
+   	}
+    
+  
+ 	
+ 
+ </script>
+ 
+ 
+ <meta charset="UTF-8">
+ <title>Insert title here</title>
+ </head>
+ <body>
+ 
+ 
+ <form name="totalThey" id="totalThey">
+ 	<div id="container" class="container modern-skin">
+ 	   <div id="gardenList" style=" width:33%; " >
+ 		  <div class="btn-group" role="group" aria-label="Basic radio toggle button group" style=" overflow: auto; width: 100%;">
+ 			 <div id="parkChoice" style=" height: 600px; " > </div>
+ 			 
+ 		</div>
+ 	   </div>
+ 		   
+ 	  <div id="dateCon"  style=" width:33%; height:100%; float: left">
+ 		<div id="resDate" style="height: 50%; width: 100%;float: left ">
+ 			<input type="text" name="datepicker" id="datepicker" style="width:100%">
+ 		</div>
+ 		<div id="ampm" style=" height: 50%; width: 100%">
+ 			<input type="radio" class="btn-check" name="time" id="morning" value="morning" autocomplete="off" checked>
+ 			<label class="btn btn-outline-primary" for="morning" style="width: 100%">오전
+ 			</label><br>
+ 			<input type="radio" class="btn-check" name="time" id="afternoon" value="afternoon" autocomplete="off" checked>
+ 			<label class="btn btn-outline-primary" for="afternoon" style="width: 100%">오후
+ 			</label><br>
+ 			<input type="radio" class="btn-check" name="time" id="night" value="night" autocomplete="off" checked>
+ 			<label class="btn btn-outline-primary" for="night" style="width: 100%">야간
+ 			</label>
+ 		</div>
+ 	  </div> 
+ 		
+ 		<div id="relDetail" style=" width:33%;  float: left ">
+ 			몇명?
+ 			
+ 			어른
+ 			<input type='button' onclick='adultCount("plus")' value='+'/>
+ 			<input type='button' onclick='adultCount("minus")' value='-'/>
+ 			<div id='adultTotal'>0</div>
+ 			<input type="hidden" name="adult" id="adult" value="0">
+ 			
+ 			소아
+ 			<input type='button' onclick='childCount("plus")' value='+'/>
+ 			<input type='button' onclick='childCount("minus")' value='-'/>
+ 			<div id='childTotal'>0</div>
+ 			<input type="hidden" name="child" id="child" value="0">
+ 			
+ 			
+ 			우대
+ 			<input type='button' onclick='disabCount("plus")' value='+'/>
+ 			<input type='button' onclick='disabCount("minus")' value='-'/>
+ 			<div id='disabTotal'>0</div>
+ 			<input type="hidden" name="disability" id="disability" value="0">
+ 			
+ 		</div>
+ 	</div>
+ 	
+ 	<button type="button" id="calcBtn"> 계산하기 </button>
+ </form>
+ 
+ 
+ 
+ 총합
+ <div id="totalPrice"></div>
+ 
+ 
+-<form action="/garden/reserveRes" method="post">
++<form action="/garden/reserveSet" method="post">
+ <input id="goToRes" name="reserveInfo" type="text">
+ <button>예약하기</button>
+ </form> 
+ 
+ </body>
+ </html>
+\ No newline at end of file

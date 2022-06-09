@@ -1,0 +1,137 @@
+#diary {
+	width : 1000px;
+	height : 600px;	
+}
+
+#profile-box {
+	display : inline-flex;
+}
+
+#plant-photo {
+	width : 150px;
+	height : 150px;
+}
+
+#info-box {
+	width : 650px;
+	padding : 12px 0px 12px 0px;
+	margin : 0px 100px 0px 100px;
+}
+
+#profile-table {
+	margin : 0px;
+}
+
+#date-box {
+	margin : 24px 0px 0px 0px;
+	border-top : 1px solid #ccc;
+	text-align : right;
+}
+
+.diary-box { 
+	display : inline-flex;
+	height : 100px;
+	margin : 10px 0px 10px 0px;
+}
+
+.write-box {
+	width : 150px;
+	height : 100px;
+	padding : 15px;
+	border : 1px solid black;
+	border-radius : 20px;
+}
+
+.write-box:hover{
+	border : 2px solid green;
+}
+
+
+.tip-box {
+	width : 350px;
+	text-align : left;
+	padding : 20px 20px 10px 20px;
+
+}
+
+#check-box{
+	padding : 8px;
+}
+
+#content-con {
+	display : inline-flex;
+	height : 160px;
+	padding : 10px 0px 0px 0px;
+}
+
+#content-box {
+	width : 500px;
+}
+
+#upload-box {
+	display : inline-flex;
+	width : 500px;
+}
+
+.title-box {
+	width : 150px;
+	height : 30px;
+	margin : 0px 0px 20px 0px;
+	padding : 5px;
+	border : 1px solid black;
+	border-radius : 20px;
+}
+
+.title-box:hover {
+	border : 2px solid green;	
+}
+
+#upload-photo-box {
+	width : 150px;
+	height : 150px;
+	padding : 12px 0px 0px 10px;
+}
+
+#upload-name {
+	width : 200px;
+	height : 120px;
+	padding : 12px 20px 10px 10px;
+	font-size :15px;
+	text-align : left;
+}
+
+#upload-file {
+	visibility : hidden;
+}
+
+#submit-box {
+	width : 200px;
+	text-align : right;
+}
+
+#text-box {
+	width : 500px;
+	height : 100px;
+	padding : 0px 20px 0px 15px;
+	
+}
+
+#write-button {
+	border-radius : 10px;	
+}
+
+#alter-button {
+	border-radius : 10px;
+}
+
+#drop-button {
+	border-radius : 10px;
+}
+
+input {
+	text-align : center;	
+}
+
+label {
+	cursor : pointer;
+}
